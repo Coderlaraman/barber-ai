@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: barber
+      POSTGRES_USER: barber
+      POSTGRES_PASSWORD: barber
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U barber -d barber"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  redis:
+    image: redis:7-alpine
+  auth-service:
+    build:
+      context: ./services/auth-service
+    environment:
+      NODE_ENV: development
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: barber
+      DB_PASSWORD: barber
+      DB_NAME: barber
+      JWT_SECRET: dev-secret
+      JWT_REFRESH_SECRET: dev-refresh
+      JWT_EXPIRES_IN: "900"
+      JWT_REFRESH_EXPIRES_IN: "604800"
+      PORT: "3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+    environment:
+      NODE_ENV: development
+      PORT: "8080"
+      AUTH_SERVICE_URL: http://auth-service:3001
+    depends_on:
+      - auth-service
+    ports:
+      - "8080:8080"
+volumes:
+  pgdata:

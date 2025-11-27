@@ -1,0 +1,67 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+      - name: Install deps (auth service)
+        working-directory: services/auth-service
+        run: npm install --no-audit --no-fund
+      - name: Build (auth)
+        working-directory: services/auth-service
+        run: npm run build
+      - name: Test (auth)
+        working-directory: services/auth-service
+        run: npm run test -- --config jest.config.cjs
+      - name: Install deps (gateway)
+        working-directory: services/api-gateway
+        run: npm install --no-audit --no-fund
+      - name: Build (gateway)
+        working-directory: services/api-gateway
+        run: npm run build
+      - name: Test (gateway)
+        working-directory: services/api-gateway
+        run: npm run test -- --config jest.config.cjs
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        if: secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push auth-service
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/auth-service
+          push: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/barberia-auth:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build and push api-gateway
+        uses: docker/build-push-action@v6
+        with:
+          context: ./services/api-gateway
+          push: ${{ secrets.DOCKERHUB_USERNAME && secrets.DOCKERHUB_TOKEN }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/barberia-gateway:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
