@@ -47,5 +47,70 @@ services:
       - auth-service
     ports:
       - "8080:8080"
+  scheduler-service:
+    build:
+      context: ./services/scheduler-service
+    environment:
+      NODE_ENV: development
+      PORT: "3002"
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://barber:barber@postgres:5432/barber
+    depends_on:
+      - redis
+      - postgres
+    expose:
+      - "3002"
+  notifications-service:
+    build:
+      context: ./services/notifications-service
+    environment:
+      NODE_ENV: development
+      PORT: "3003"
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    expose:
+      - "3003"
+  portfolio-service:
+    build:
+      context: ./services/portfolio-service
+    environment:
+      NODE_ENV: development
+      PORT: "3004"
+      DATABASE_URL: postgres://barber:barber@postgres:5432/barber
+      STORAGE_PROVIDER: s3
+    depends_on:
+      - postgres
+    expose:
+      - "3004"
+  search-service:
+    build:
+      context: ./services/search-service
+    environment:
+      NODE_ENV: development
+      PORT: "3005"
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    expose:
+      - "3005"
+  ranking-service:
+    build:
+      context: ./services/ranking-service
+    environment:
+      NODE_ENV: development
+      PORT: "3006"
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
+    expose:
+      - "3006"
+  ai-recommender-service:
+    build:
+      context: ./services/ai-recommender-service
+    environment:
+      PYTHONUNBUFFERED: "1"
+    expose:
+      - "8000"
 volumes:
   pgdata:
