@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { SchedulerModule } from './scheduler/scheduler.module'
+import { SchedulerModule } from './scheduler.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { Block } from '../domain/entities/block.entity'
-import { Appointment } from '../domain/entities/appointment.entity'
+import { HealthModule } from './health/health.module'
+import { Appointment } from './appointments/entities/appointment.entity'
+import { AppointmentHistory } from './appointments/entities/appointment-history.entity'
+import { BarberAvailability } from './availability/entities/barber-availability.entity'
+import { Service } from './services/entities/service.entity'
+import { TimeSlot } from './time-slots/entities/time-slot.entity'
 
 @Module({
   imports: [
@@ -11,7 +15,17 @@ import { Appointment } from '../domain/entities/appointment.entity'
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const url = process.env.DATABASE_URL
-        const base: any = { type: 'postgres', entities: [Block, Appointment], synchronize: false }
+        const base: any = { 
+          type: 'postgres', 
+          entities: [
+            Appointment, 
+            AppointmentHistory, 
+            BarberAvailability, 
+            Service, 
+            TimeSlot
+          ], 
+          synchronize: false 
+        }
         if (url) return { ...base, url }
         return {
           ...base,
@@ -23,6 +37,7 @@ import { Appointment } from '../domain/entities/appointment.entity'
         }
       }
     }),
+    HealthModule,
     SchedulerModule
   ]
 })
