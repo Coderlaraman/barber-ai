@@ -18,7 +18,8 @@ services:
     image: redis:7-alpine
   auth-service:
     build:
-      context: ./services/auth-service
+      context: .
+      dockerfile: services/auth-service/Dockerfile
     environment:
       NODE_ENV: development
       DB_HOST: postgres
@@ -38,18 +39,25 @@ services:
       - "3001:3001"
   api-gateway:
     build:
-      context: ./services/api-gateway
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
     environment:
       NODE_ENV: development
       PORT: "8080"
       AUTH_SERVICE_URL: http://auth-service:3001
     depends_on:
       - auth-service
+      - scheduler-service
+      - notifications-service
+      - portfolio-service
+      - search-service
+      - ranking-service
     ports:
       - "8080:8080"
   scheduler-service:
     build:
-      context: ./services/scheduler-service
+      context: .
+      dockerfile: services/scheduler-service/Dockerfile
     environment:
       NODE_ENV: development
       PORT: "3002"
@@ -62,7 +70,8 @@ services:
       - "3002"
   notifications-service:
     build:
-      context: ./services/notifications-service
+      context: .
+      dockerfile: services/notifications-service/Dockerfile
     environment:
       NODE_ENV: development
       PORT: "3003"
@@ -73,7 +82,8 @@ services:
       - "3003"
   portfolio-service:
     build:
-      context: ./services/portfolio-service
+      context: .
+      dockerfile: services/portfolio-service/Dockerfile
     environment:
       NODE_ENV: development
       PORT: "3004"
@@ -85,7 +95,8 @@ services:
       - "3004"
   search-service:
     build:
-      context: ./services/search-service
+      context: .
+      dockerfile: services/search-service/Dockerfile
     environment:
       NODE_ENV: development
       PORT: "3005"
@@ -96,7 +107,8 @@ services:
       - "3005"
   ranking-service:
     build:
-      context: ./services/ranking-service
+      context: .
+      dockerfile: services/ranking-service/Dockerfile
     environment:
       NODE_ENV: development
       PORT: "3006"

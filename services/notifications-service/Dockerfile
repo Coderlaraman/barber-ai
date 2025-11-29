@@ -1,9 +1,12 @@
 FROM node:22-alpine
 WORKDIR /app
-COPY package.json package-lock.json* ./
+COPY packages/contracts ./packages/contracts
+RUN npm --prefix packages/contracts install --no-audit --no-fund \
+  && npm --prefix packages/contracts run build
+COPY services/notifications-service/package.json ./
 RUN npm install --no-audit --no-fund
-COPY tsconfig.json ./
-COPY src ./src
+COPY services/notifications-service/tsconfig.json ./
+COPY services/notifications-service/src ./src
 RUN npm run build
 ENV PORT=3003
 EXPOSE 3003

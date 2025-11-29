@@ -1,0 +1,19 @@
+{
+  "name": "barber_ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "services/*"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
+    "eslint": "^9.39.1"
+  },
+  "scripts": {
+    "lint:all": "npm run -w services/auth-service lint && npm run -w services/api-gateway lint && npm run -w services/scheduler-service lint && npm run -w services/portfolio-service lint && npm run -w services/search-service lint && npm run -w services/ranking-service lint && npm run -w services/notifications-service lint",
+    "typecheck:all": "npm run -w services/auth-service typecheck && npm run -w services/api-gateway typecheck && npm run -w services/scheduler-service typecheck && npm run -w services/portfolio-service typecheck && npm run -w services/search-service typecheck && npm run -w services/ranking-service typecheck && npm run -w services/notifications-service typecheck"
+  }
+}

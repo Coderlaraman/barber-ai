@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScheduleBlockedEvent",
+  "type": "object",
+  "properties": {
+    "blockId": { "type": "string" },
+    "barberId": { "type": "string" },
+    "start": { "type": "string", "format": "date-time" },
+    "end": { "type": "string", "format": "date-time" }
+  },
+  "required": ["blockId", "barberId", "start", "end"]
+}

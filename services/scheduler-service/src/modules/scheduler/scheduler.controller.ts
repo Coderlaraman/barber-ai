@@ -16,4 +16,9 @@ export class SchedulerController {
   getAvailability() {
     return { status: 'stub', availability: [] }
   }
+
+  @Get('health')
+  health() {
+    return { status: 'ok', service: 'scheduler' }
+  }
 }

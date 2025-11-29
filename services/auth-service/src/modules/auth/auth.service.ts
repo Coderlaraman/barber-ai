@@ -42,7 +42,7 @@ export class AuthService {
       if (!user) throw new UnauthorizedException('INVALID_REFRESH')
       const accessToken = await this.jwt.signAsync({ sub: user.id, role: user.role })
       return { accessToken }
-    } catch (e) {
+    } catch {
       throw new UnauthorizedException('INVALID_REFRESH')
     }
   }

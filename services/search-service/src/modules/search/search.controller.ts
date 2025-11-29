@@ -6,4 +6,9 @@ export class SearchController {
   search(@Query() _q: any) {
     return { status: 'stub', results: [] }
   }
+
+  @Get('health')
+  health() {
+    return { status: 'ok', service: 'search' }
+  }
 }
