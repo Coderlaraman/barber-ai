@@ -8,6 +8,6 @@ RUN npm install --no-audit --no-fund
 COPY services/api-gateway/tsconfig.json ./
 COPY services/api-gateway/src ./src
 RUN npm run build
-ENV PORT=8080
-EXPOSE 8080
+ENV PORT=8085
+EXPOSE 8085
 CMD ["node", "dist/main.js"]

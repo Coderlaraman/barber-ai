@@ -22,16 +22,16 @@ docker compose build
 docker compose up -d
 ```
 
-Gateway disponible en `http://localhost:8080`. Auth-service en `http://localhost:3001`.
+Gateway disponible en `http://localhost:8085`. Auth-service en `http://localhost:3001`.
 
 ## Autenticación
 ```bash
 curl -X POST http://localhost:3001/auth/register -H 'Content-Type: application/json' -d '{"email":"barber@example.com","password":"password123","role":"BARBER"}'
-curl -X POST http://localhost:8080/auth/login -H 'Content-Type: application/json' -d '{"email":"barber@example.com","password":"password123"}'
+curl -X POST http://localhost:8085/auth/login -H 'Content-Type: application/json' -d '{"email":"barber@example.com","password":"password123"}'
 ```
 
 ## Documentación de API
-- Gateway: `http://localhost:8080/docs`
+- Gateway: `http://localhost:8085/docs`
 - Auth: `http://localhost:3001/docs`
 
 ## Principios de arquitectura

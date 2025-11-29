@@ -16,6 +16,11 @@ services:
       retries: 10
   redis:
     image: redis:7-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -h 127.0.0.1 -p 6379 ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
   auth-service:
     build:
       context: .
@@ -31,29 +36,47 @@ services:
       JWT_REFRESH_SECRET: dev-refresh
       JWT_EXPIRES_IN: "900"
       JWT_REFRESH_EXPIRES_IN: "604800"
-      PORT: "3001"
+      PORT: "3002"
     depends_on:
       postgres:
         condition: service_healthy
     ports:
-      - "3001:3001"
+      - "3005:3005"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3005/auth/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   api-gateway:
     build:
       context: .
       dockerfile: services/api-gateway/Dockerfile
     environment:
       NODE_ENV: development
-      PORT: "8080"
-      AUTH_SERVICE_URL: http://auth-service:3001
+      PORT: "8085"
+      AUTH_SERVICE_URL: http://auth-service:3005
     depends_on:
-      - auth-service
-      - scheduler-service
-      - notifications-service
-      - portfolio-service
-      - search-service
-      - ranking-service
+      auth-service:
+        condition: service_healthy
+      scheduler-service:
+        condition: service_healthy
+      notifications-service:
+        condition: service_healthy
+      portfolio-service:
+        condition: service_healthy
+      search-service:
+        condition: service_healthy
+      ranking-service:
+        condition: service_healthy
+      ai-recommender-service:
+        condition: service_healthy
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   scheduler-service:
     build:
       context: .
@@ -64,10 +87,17 @@ services:
       REDIS_URL: redis://redis:6379
       DATABASE_URL: postgres://barber:barber@postgres:5432/barber
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     expose:
-      - "3002"
+      - "3005"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3005/scheduler/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   notifications-service:
     build:
       context: .
@@ -77,9 +107,15 @@ services:
       PORT: "3003"
       REDIS_URL: redis://redis:6379
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     expose:
       - "3003"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3003/notifications/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   portfolio-service:
     build:
       context: .
@@ -90,9 +126,15 @@ services:
       DATABASE_URL: postgres://barber:barber@postgres:5432/barber
       STORAGE_PROVIDER: s3
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     expose:
       - "3004"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3004/portfolio/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   search-service:
     build:
       context: .
@@ -102,9 +144,15 @@ services:
       PORT: "3005"
       REDIS_URL: redis://redis:6379
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     expose:
       - "3005"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3005/search/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   ranking-service:
     build:
       context: .
@@ -114,9 +162,15 @@ services:
       PORT: "3006"
       REDIS_URL: redis://redis:6379
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     expose:
       - "3006"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3006/ranking/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   ai-recommender-service:
     build:
       context: ./services/ai-recommender-service
@@ -124,5 +178,10 @@ services:
       PYTHONUNBUFFERED: "1"
     expose:
       - "8000"
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').getcode()==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   pgdata:
