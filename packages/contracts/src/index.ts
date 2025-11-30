@@ -10,6 +10,7 @@ export * from './events/ranking'
 export * from './events/index'
 export * from './config/redis.config'
 export * from './utils/event-factory'
+export * from './services/event-replay.service'
 
 // Eventos de booking
 export * from './events/booking-events'

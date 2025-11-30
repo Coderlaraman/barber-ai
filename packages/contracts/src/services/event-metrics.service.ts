@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, Inject } from '@nestjs/common'
 import { EventBusService } from './event-bus.service'
 import { PostgresEventStore } from './postgres-event-store.service'
 
@@ -56,7 +56,7 @@ export class EventMetricsService {
 
   constructor(
     private readonly eventBus: EventBusService,
-    private readonly eventStore: PostgresEventStore
+    @Inject('EVENT_STORE') private readonly eventStore: PostgresEventStore
   ) {}
 
   /**

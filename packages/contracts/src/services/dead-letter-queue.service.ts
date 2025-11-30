@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common'
 import { DomainEvent } from '../events/base'
 import { PostgresEventStore } from './postgres-event-store.service'
 import { EventBusService } from './event-bus.service'
@@ -29,6 +29,7 @@ export class DeadLetterQueueService {
 
   constructor(
     private readonly eventStore: PostgresEventStore,
+    @Inject(forwardRef(() => EventBusService))
     private readonly eventBus: EventBusService
   ) {
     this.setupDefaultRetryPolicies()

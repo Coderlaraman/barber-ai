@@ -1,10 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common'
 import { Redis } from 'ioredis'
 import { DomainEvent, IEventBus, IEventHandler, IEventStore } from '../events/base'
 import { DeadLetterQueueService } from './dead-letter-queue.service'
+import { RedisConfiguration } from '../config/redis.config'
 
 @Injectable()
-export class EventBusService implements IEventBus {
+export class EventBusService implements IEventBus, OnModuleInit {
+  private redisConfig?: RedisConfiguration
   private readonly logger = new Logger(EventBusService.name)
   private publisher!: Redis
   private subscriber!: Redis
@@ -13,15 +15,23 @@ export class EventBusService implements IEventBus {
 
   constructor(
     eventStore: IEventStore,
+    @Inject(forwardRef(() => DeadLetterQueueService))
     private readonly deadLetterQueue?: DeadLetterQueueService
   ) {
     this.eventStore = eventStore
   }
 
-  async connect(redisUrl: string): Promise<void> {
+  async onModuleInit(): Promise<void> {
+    await this.connect()
+  }
+
+  async connect(redisConfig?: RedisConfiguration): Promise<void> {
     try {
-      this.publisher = new Redis(redisUrl)
-      this.subscriber = new Redis(redisUrl)
+      const config = redisConfig || RedisConfiguration.getInstance()
+      const { publisher, subscriber } = config.createRedisClientForPubSub()
+      
+      this.publisher = publisher
+      this.subscriber = subscriber
 
       await this.publisher.ping()
       await this.subscriber.ping()

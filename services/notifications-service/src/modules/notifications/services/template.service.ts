@@ -10,20 +10,8 @@ export class TemplateService {
   private readonly logger = new Logger(TemplateService.name)
 
   constructor(
-    // @InjectRepository(NotificationTemplate)
     private templateRepository: Repository<NotificationTemplate>
-  ) {
-    // Initialize mock repository for testing
-    this.templateRepository = {
-      findOne: async (): Promise<NotificationTemplate | null> => null,
-      find: async (): Promise<NotificationTemplate[]> => [],
-      save: async (entity: NotificationTemplate): Promise<NotificationTemplate> => entity,
-      create: (entity: Partial<NotificationTemplate>): NotificationTemplate => entity as NotificationTemplate,
-      delete: async (): Promise<void> => {},
-      update: async (): Promise<void> => {},
-      count: async (): Promise<number> => 0
-    } as any
-  }
+  ) {}
 
   async createTemplate(dto: CreateTemplateDto): Promise<NotificationTemplate> {
     const template = this.templateRepository.create({

@@ -128,6 +128,27 @@ export class PostgresEventStore implements PersistentEventStore {
     }
   }
 
+  async getEventById(eventId: string): Promise<DomainEvent | null> {
+    const eventEntity = await this.eventRepository.findOne({
+      where: { eventId }
+    })
+
+    if (!eventEntity) {
+      return null
+    }
+
+    return {
+      eventId: eventEntity.eventId,
+      eventType: eventEntity.eventType,
+      aggregateId: eventEntity.aggregateId,
+      aggregateType: eventEntity.aggregateType,
+      timestamp: eventEntity.timestamp,
+      version: eventEntity.version,
+      payload: eventEntity.payload,
+      metadata: eventEntity.metadata
+    }
+  }
+
   async getSnapshot(aggregateId: string): Promise<any> {
     const snapshotEntity = await this.snapshotRepository.findOne({
       where: { aggregateId },
@@ -137,16 +158,23 @@ export class PostgresEventStore implements PersistentEventStore {
     return snapshotEntity?.snapshot || null
   }
 
-  async replayEvents(fromTime: string): Promise<void> {
+  async replayEvents(fromTime: string): Promise<DomainEvent[]> {
     const events = await this.getEventsByTimeRange(fromTime, new Date().toISOString())
     
     this.logger.log(`Reproduciendo ${events.length} eventos desde ${fromTime}`)
     
-    // En una implementación real, aquí se re-dispersarían los eventos
-    // a los handlers correspondientes
+    // Marcar eventos como reprocesados
     for (const event of events) {
-      this.logger.log(`Reproduciendo evento: ${event.eventType} - ${event.aggregateId}`)
+      try {
+        this.logger.log(`Marcando evento como replayed: ${event.eventType} - ${event.aggregateId}`)
+        await this.markEventAsReplayed(event.eventId)
+      } catch (error) {
+        this.logger.error(`Error marcando evento ${event.eventId} como replayed:`, error)
+      }
     }
+    
+    this.logger.log(`Reproducción completada: ${events.length} eventos marcados como replayed`)
+    return events
   }
 
   // Métodos adicionales para métricas y monitoreo
@@ -263,6 +291,29 @@ export class PostgresEventStore implements PersistentEventStore {
         processedAt: new Date()
       })
     }
+  }
+
+  async markEventAsReplayed(eventId: string): Promise<void> {
+    await this.eventRepository.update(eventId, {
+      status: 'REPLAYED',
+      processedAt: new Date()
+    })
+  }
+
+  async getLastEventTimestamp(): Promise<string | null> {
+    const lastEvent = await this.eventRepository.findOne({
+      order: { timestamp: 'DESC' }
+    })
+    
+    return lastEvent?.timestamp || null
+  }
+
+  async getFirstEventTimestamp(): Promise<string | null> {
+    const firstEvent = await this.eventRepository.findOne({
+      order: { timestamp: 'ASC' }
+    })
+    
+    return firstEvent?.timestamp || null
   }
 
   private entityToDomainEvent(entity: EventEntity): DomainEvent {

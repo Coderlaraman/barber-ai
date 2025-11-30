@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { BookingEventHandler } from 'contracts'
-import { BookingService } from '../booking.service'
+import { BookingService } from './booking.service'
 import { BookingCreatedEvent, BookingCancelledEvent, BookingRescheduledEvent, BookingConfirmedEvent } from 'contracts'
 
 /**
@@ -13,6 +13,15 @@ export class BookingEventProcessor extends BookingEventHandler<BookingCreatedEve
 
   constructor(private readonly bookingService: BookingService) {
     super()
+  }
+
+  canHandle(eventType: string): boolean {
+    return [
+      'booking.created',
+      'booking.cancelled',
+      'booking.rescheduled',
+      'booking.confirmed'
+    ].includes(eventType)
   }
 
   protected async processEvent(
@@ -34,7 +43,7 @@ export class BookingEventProcessor extends BookingEventHandler<BookingCreatedEve
         await this.handleBookingConfirmed(event as BookingConfirmedEvent)
         break
       default:
-        this.logger.warn(`Tipo de evento no manejado: ${event.eventType}`)
+        this.logger.warn(`Tipo de evento no manejado: ${(event as any).eventType}`)
     }
   }
 

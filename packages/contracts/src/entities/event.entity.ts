@@ -43,7 +43,7 @@ export class EventEntity {
   retryCount!: number
 
   @Column({ default: 'PENDING' })
-  status!: 'PENDING' | 'PROCESSED' | 'FAILED' | 'DEAD_LETTER'
+  status!: 'PENDING' | 'PROCESSED' | 'FAILED' | 'DEAD_LETTER' | 'REPLAYED'
 
   @Column({ nullable: true })
   errorMessage?: string

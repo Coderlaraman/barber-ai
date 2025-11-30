@@ -88,5 +88,5 @@ export interface PersistentEventStore extends IEventStore {
   // Métodos adicionales para implementaciones persistentes
   createSnapshot(aggregateId: string): Promise<void>
   getSnapshot(aggregateId: string): Promise<any>
-  replayEvents(fromTime: string): Promise<void>
+  replayEvents(fromTime: string): Promise<DomainEvent[]>
 }

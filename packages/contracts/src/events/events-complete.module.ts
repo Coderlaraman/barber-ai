@@ -6,7 +6,7 @@ import { InMemoryEventStore } from '../services/event-store.service'
 import { EventMetricsService } from '../services/event-metrics.service'
 import { DeadLetterQueueService } from '../services/dead-letter-queue.service'
 import { EventDashboardController } from '../controllers/event-dashboard.controller'
-import { getRedisUrl, RedisConfig } from '../config/redis.config'
+import { RedisConfig } from '../config/redis.config'
 
 export interface CompleteEventsModuleOptions {
   redisConfig?: RedisConfig
@@ -31,7 +31,7 @@ export class CompleteEventsModule {
       enableDashboard = true
     } = options
 
-    const redisUrl = getRedisUrl(redisConfig)
+    // Configuración de Redis se maneja internamente en EventBusService
 
     // Configurar módulos de TypeORM si se usa PostgreSQL
     const typeOrmModule = useInMemoryStore ? [] : [
@@ -40,10 +40,6 @@ export class CompleteEventsModule {
 
     // Proveedores base
     const providers: any[] = [
-      {
-        provide: 'REDIS_URL',
-        useValue: redisUrl,
-      },
       {
         provide: 'EVENT_STORE',
         useClass: useInMemoryStore ? InMemoryEventStore : PostgresEventStore,

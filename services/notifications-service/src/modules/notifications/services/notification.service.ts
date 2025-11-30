@@ -1,13 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { InjectRepository } from '../../../typeorm-mock'
+import { Injectable, Logger, Inject } from '@nestjs/common'
 import { Repository } from '../../../typeorm-mock'
 import { Notification } from '../entities/notification.entity'
 import { UserNotificationPreference } from '../entities/user-notification-preference.entity'
 import { CreateNotificationDto } from '../dto/create-notification.dto'
 import { NotificationStatus, NotificationChannel, NotificationType } from '../enums/notification.enum'
 import { EmailService } from './email.service'
-import { PushNotificationService } from './push-notification.service'
-import { SMSService } from './sms.service'
+import { PushNotificationService } from './push-notification-mock.service'
+import { SMSMockService as SMSService } from './sms-mock.service'
 import { TemplateService } from './template.service'
 
 export interface NotificationResult {
@@ -22,36 +21,15 @@ export class NotificationService {
   private readonly logger = new Logger(NotificationService.name)
 
   constructor(
-    // @InjectRepository(Notification)
+    @Inject('NotificationRepository')
     private notificationRepository: Repository<Notification>,
-    // @InjectRepository(UserNotificationPreference)
+    @Inject('UserNotificationPreferenceRepository')
     private preferenceRepository: Repository<UserNotificationPreference>,
     private emailService: EmailService,
     private pushService: PushNotificationService,
     private smsService: SMSService,
     private templateService: TemplateService
-  ) {
-    // Initialize mock repositories for testing
-    this.notificationRepository = {
-      findOne: async (): Promise<Notification | null> => null,
-      find: async (): Promise<Notification[]> => [],
-      save: async (entity: Notification): Promise<Notification> => entity,
-      create: (entity: Partial<Notification>): Notification => entity as Notification,
-      delete: async (): Promise<void> => {},
-      update: async (): Promise<void> => {},
-      count: async (): Promise<number> => 0
-    } as any
-    
-    this.preferenceRepository = {
-      findOne: async (): Promise<UserNotificationPreference | null> => null,
-      find: async (): Promise<UserNotificationPreference[]> => [],
-      save: async (entity: UserNotificationPreference): Promise<UserNotificationPreference> => entity,
-      create: (entity: Partial<UserNotificationPreference>): UserNotificationPreference => entity as UserNotificationPreference,
-      delete: async (): Promise<void> => {},
-      update: async (): Promise<void> => {},
-      count: async (): Promise<number> => 0
-    } as any
-  }
+  ) {}
 
   async createNotification(dto: CreateNotificationDto): Promise<Notification> {
     const notificationData = {
@@ -64,6 +42,26 @@ export class NotificationService {
     
     const notification = this.notificationRepository.create(notificationData)
     return this.notificationRepository.save(notification)
+  }
+
+  async createNotificationFromEvent(event: any): Promise<Notification> {
+    // Extraer datos del evento para crear la notificación
+    const notificationData = {
+      userId: event.metadata?.userId,
+      type: event.metadata?.type || NotificationType.SYSTEM_UPDATE,
+      channel: event.metadata?.channel || NotificationChannel.EMAIL,
+      title: event.metadata?.title || 'Notificación del Sistema',
+      content: event.metadata?.content || 'Tienes una nueva notificación.',
+      metadata: {
+        ...event.metadata,
+        eventId: event.id,
+        eventType: event.eventType,
+        aggregateId: event.aggregateId,
+        timestamp: event.timestamp
+      }
+    }
+
+    return this.createNotification(notificationData)
   }
 
   async sendNotification(notification: Notification): Promise<NotificationResult[]> {
