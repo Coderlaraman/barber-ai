@@ -1,11 +1,11 @@
 import 'reflect-metadata'
 import { NestFactory } from '@nestjs/core'
-import { AppModule } from './modules/app.module'
+import { AppDevModule } from './modules/app.dev.module'
 import { ValidationPipe } from '@nestjs/common'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppDevModule)
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }))
   
   // Configuración mejorada de Swagger

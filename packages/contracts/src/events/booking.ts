@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use booking-events.ts instead
+ * Eventos de booking legacy - serán removidos en versión futura
+ */
 export interface BookingCreatedEvent {
   appointmentId: string
   barberId: string
