@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { ThrottlerModule } from '@nestjs/throttler'
 import { AuthModule } from './auth/auth.module'
 import { User } from './auth/entities/user.entity'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // Time to live in milliseconds
+      limit: 10, // Maximum number of requests within the ttl
+    }]),
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',

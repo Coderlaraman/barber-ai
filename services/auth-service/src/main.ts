@@ -12,7 +12,27 @@ async function bootstrap() {
   )
   const config = new DocumentBuilder()
     .setTitle('BarberIA Auth API')
-    .setDescription('Endpoints de autenticación y gestión de usuarios')
+    .setDescription(`
+      Endpoints de autenticación y gestión de usuarios
+      
+      ## Características de Seguridad
+      
+      ### Auditoría de Accesos
+      - **Registro completo de eventos**: Login, logout, registro, refresco de tokens
+      - **Seguimiento de intentos fallidos**: Monitoreo de credenciales inválidas
+      - **Información contextual**: IP, user agent, timestamp de cada evento
+      - **Detección de actividad sospechosa**: Alertas por múltiples intentos fallidos
+      
+      ### Tokens JWT
+      - **Access tokens**: Válidos por 15 minutos, contienen permisos del usuario
+      - **Refresh tokens**: Válidos por 7 días, permiten renovar access tokens
+      - **Revocación**: Los tokens pueden ser invalidados en caso de compromiso
+      
+      ### Roles y Permisos
+      - **CLIENT**: Usuarios finales del sistema
+      - **BARBER**: Barberos con acceso a gestión de servicios
+      - **ADMIN**: Administradores con acceso completo al sistema
+    `)
     .setVersion('0.1.0')
     .addBearerAuth()
     .build()

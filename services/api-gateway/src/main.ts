@@ -150,9 +150,31 @@ async function bootstrap() {
       pathRewrite: (path) => path.replace(/^\/docs-json\/ranking/, '/docs-json')
     })
   )
-  expressApp.use('/docs/ai', swaggerUi.serve, swaggerUi.setup(undefined, {
+  app.use('/docs/ai', swaggerUi.serve, swaggerUi.setup(undefined, {
     swaggerOptions: { url: '/docs-json/ai' }
   }))
+  
+  // Specific proxy configurations for appointments endpoints
+  app.use(
+    '/appointments',
+    createProxyMiddleware({
+      target: 'http://scheduler-service:3002',
+      changeOrigin: true,
+      ws: true,
+      pathRewrite: (path) => path.startsWith('/appointments') ? path : `/appointments${path}`
+    })
+  )
+  
+  app.use(
+    '/availability',
+    createProxyMiddleware({
+      target: 'http://scheduler-service:3002',
+      changeOrigin: true,
+      ws: true,
+      pathRewrite: (path) => path.startsWith('/availability') ? path : `/availability${path}`
+    })
+  )
+  
   app.use(
     '/scheduler',
     createProxyMiddleware({
@@ -216,7 +238,7 @@ async function bootstrap() {
       pathRewrite: (path) => path.replace(/^\/ai/, '')
     })
   )
-  await app.listen(process.env.PORT ? Number(process.env.PORT) : 8085)
+  await app.listen(process.env.PORT ? Number(process.env.PORT) : 8080)
 }
 
 bootstrap()
