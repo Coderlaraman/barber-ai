@@ -1,12 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { SocialAuthProvider, SocialUserProfile } from '../interfaces/social-auth.interface'
 import { GoogleAuthService } from './google-auth.service'
+import { FacebookAuthService } from './facebook-auth.service'
 
 @Injectable()
 export class SocialAuthService {
   private providers: Map<string, SocialAuthProvider> = new Map()
 
-  constructor(private readonly googleAuthService: GoogleAuthService) {
+  constructor(
+    private readonly googleAuthService: GoogleAuthService,
+    private readonly facebookAuthService: FacebookAuthService
+  ) {
     // Real Google validation using GoogleAuthService
     this.providers.set('google', {
       getProviderName: () => 'google',
@@ -29,17 +33,23 @@ export class SocialAuthService {
     this.providers.set('facebook', {
       getProviderName: () => 'facebook',
       validateToken: async (token: string): Promise<SocialUserProfile> => {
-        // Mock validation - in real implementation, this would call Facebook's API
-        if (token === 'mock-facebook-token') {
+        try {
+          // Verify the Facebook token
+          await this.facebookAuthService.verifyFacebookToken(token)
+          
+          // Get user profile information
+          const facebookProfile = await this.facebookAuthService.getFacebookUserProfile(token)
+          
           return {
-            id: 'facebook-456',
-            email: 'user@facebook.com',
-            name: 'Facebook User',
+            id: facebookProfile.id,
+            email: facebookProfile.email,
+            name: facebookProfile.name,
             provider: 'facebook',
-            avatar: 'https://example.com/avatar.jpg'
+            avatar: facebookProfile.picture?.data?.url
           }
+        } catch {
+          throw new UnauthorizedException('Invalid Facebook token')
         }
-        throw new UnauthorizedException('Invalid Facebook token')
       }
     })
   }

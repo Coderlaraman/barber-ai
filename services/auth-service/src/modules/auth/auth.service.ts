@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common'
+import { Injectable, BadRequestException, UnauthorizedException, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { User, UserRole, AuthProvider } from './entities/user.entity'
@@ -8,6 +8,8 @@ import { getRolePermissions } from './entities/role-permissions.entity'
 import { AuditService } from './services/audit.service'
 import { SocialAuthService } from './services/social-auth.service'
 import { TokenBlacklistService } from './services/token-blacklist.service'
+import { EmailService } from './services/email.service'
+import { EmailVerificationService } from './services/email-verification.service'
 import { AuditAction, AuditStatus } from './entities/access-audit.entity'
 
 @Injectable()
@@ -17,7 +19,9 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly auditService: AuditService,
     private readonly socialAuthService: SocialAuthService,
-    private readonly tokenBlacklistService: TokenBlacklistService
+    private readonly tokenBlacklistService: TokenBlacklistService,
+    private readonly emailService: EmailService,
+    private readonly emailVerificationService: EmailVerificationService
   ) {}
 
   async register(email: string, password: string, role: User['role'], auditData?: { ipAddress?: string; userAgent?: string }) {
@@ -46,6 +50,11 @@ export class AuthService {
       details: `New ${role} account created`,
       ipAddress: auditData?.ipAddress,
       userAgent: auditData?.userAgent
+    })
+    
+    // Enviar email de verificación (no esperar para no retrasar la respuesta)
+    this.emailVerificationService.sendVerificationEmail(user.id).catch(error => {
+      console.error('Error al enviar email de verificación:', error)
     })
     
     const permissions = getRolePermissions(user.role)
@@ -217,6 +226,7 @@ export class AuthService {
           name: socialProfile.name,
           role: UserRole.CLIENT, // Default role for social auth users
           authProvider: provider === 'google' ? AuthProvider.GOOGLE : AuthProvider.FACEBOOK,
+          emailVerified: true, // Los emails de Google/Facebook ya están verificados
           // No password needed for social auth
         })
         user = await this.users.save(user)
@@ -227,6 +237,20 @@ export class AuthService {
           action: AuditAction.REGISTER,
           status: AuditStatus.SUCCESS,
           details: `Social registration via ${provider}`,
+          ipAddress: auditData?.ipAddress,
+          userAgent: auditData?.userAgent
+        })
+      } else if (!user.emailVerified) {
+        // Si el usuario existe pero no tiene email verificado, marcarlo como verificado
+        // (porque viene de un proveedor social confiable)
+        user.emailVerified = true
+        user = await this.users.save(user)
+        
+        await this.auditService.logAccess({
+          user,
+          action: AuditAction.EMAIL_VERIFICATION,
+          status: AuditStatus.SUCCESS,
+          details: `Email verified via social auth ${provider}`,
           ipAddress: auditData?.ipAddress,
           userAgent: auditData?.userAgent
         })
@@ -303,5 +327,174 @@ export class AuthService {
       { sub: user.id, email: user.email, role: user.role, permissions },
       { secret: process.env.JWT_REFRESH_SECRET || 'dev-refresh', expiresIn: exp }
     )
+  }
+
+  async verifyEmail(token: string) {
+    try {
+      const user = await this.emailVerificationService.verifyEmail(token)
+      
+      // Log successful email verification
+      await this.auditService.logAccess({
+        user,
+        action: AuditAction.EMAIL_VERIFICATION,
+        status: AuditStatus.SUCCESS,
+        details: 'Email verified successfully'
+      })
+      
+      return {
+        message: 'Email verified successfully',
+        user: {
+          id: user.id,
+          email: user.email,
+          emailVerified: user.emailVerified
+        }
+      }
+    } catch (error) {
+      // Log failed email verification
+      await this.auditService.logAccess({
+        action: AuditAction.EMAIL_VERIFICATION,
+        status: AuditStatus.FAILURE,
+        details: 'Email verification failed',
+        failureReason: error instanceof Error ? error.message : String(error)
+      })
+      throw error
+    }
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.users.findOne({ where: { email } })
+    
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+    
+    if (user.emailVerified) {
+      throw new BadRequestException('Email already verified')
+    }
+    
+    try {
+      await this.emailVerificationService.resendVerificationEmail(user.id)
+      
+      // Log successful verification email resend
+      await this.auditService.logAccess({
+        user,
+        action: AuditAction.EMAIL_VERIFICATION_RESEND,
+        status: AuditStatus.SUCCESS,
+        details: 'Verification email resent successfully'
+      })
+      
+      return {
+        message: 'Verification email sent successfully'
+      }
+    } catch (error) {
+      // Log failed verification email resend
+      await this.auditService.logAccess({
+        user,
+        action: AuditAction.EMAIL_VERIFICATION_RESEND,
+        status: AuditStatus.FAILURE,
+        details: 'Failed to resend verification email',
+        failureReason: error instanceof Error ? error.message : String(error)
+      })
+      throw error
+    }
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.users.findOne({ where: { email } })
+    
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
+    if (!user.emailVerified) {
+      throw new BadRequestException('Debes verificar tu email antes de restablecer tu contraseña')
+    }
+
+    try {
+      // Generar token de restablecimiento
+      const resetToken = this.emailVerificationService.generateToken()
+      const resetExpiry = this.emailVerificationService.generateExpiryDate(1) // 1 hora
+
+      // Guardar token en el usuario
+      user.passwordResetToken = resetToken
+      user.passwordResetExpires = resetExpiry
+      await this.users.save(user)
+
+      // Enviar email de restablecimiento (no esperar)
+      this.emailService.sendPasswordResetEmail(user.email, resetToken, user.name).catch(error => {
+        console.error('Error al enviar email de restablecimiento:', error)
+      })
+
+      // Log successful password reset request
+      await this.auditService.logAccess({
+        user,
+        action: AuditAction.PASSWORD_RESET,
+        status: AuditStatus.SUCCESS,
+        details: 'Password reset requested successfully'
+      })
+
+      return {
+        message: 'Password reset email sent successfully'
+      }
+    } catch (error) {
+      // Log failed password reset request
+      await this.auditService.logAccess({
+        user,
+        action: AuditAction.PASSWORD_RESET,
+        status: AuditStatus.FAILURE,
+        details: 'Failed to request password reset',
+        failureReason: error instanceof Error ? error.message : String(error)
+      })
+      throw error
+    }
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.users.findOne({ where: { passwordResetToken: token } })
+    
+    if (!user) {
+      throw new NotFoundException('Token de restablecimiento inválido')
+    }
+
+    if (user.passwordResetExpires && user.passwordResetExpires < new Date()) {
+      // Limpiar token expirado
+      user.passwordResetToken = undefined
+      user.passwordResetExpires = undefined
+      await this.users.save(user)
+      throw new BadRequestException('El token de restablecimiento ha expirado')
+    }
+
+    try {
+      // Hash nueva contraseña
+      const hashedPassword = await bcrypt.hash(newPassword, 10)
+      
+      // Actualizar contraseña y limpiar tokens
+      user.passwordHash = hashedPassword
+      user.passwordResetToken = undefined
+      user.passwordResetExpires = undefined
+      await this.users.save(user)
+
+      // Log successful password reset
+      await this.auditService.logAccess({
+        user,
+        action: AuditAction.PASSWORD_RESET,
+        status: AuditStatus.SUCCESS,
+        details: 'Password reset completed successfully'
+      })
+
+      return {
+        message: 'Password reset successfully'
+      }
+    } catch (error) {
+      // Log failed password reset
+      await this.auditService.logAccess({
+        user,
+        action: AuditAction.PASSWORD_RESET,
+        status: AuditStatus.FAILURE,
+        details: 'Failed to reset password',
+        failureReason: error instanceof Error ? error.message : String(error)
+      })
+      throw error
+    }
   }
 }

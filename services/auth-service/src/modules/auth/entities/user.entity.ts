@@ -38,6 +38,21 @@ export class User {
   @Column({ nullable: true })
   lockedUntil?: Date
 
+  @Column({ default: false })
+  emailVerified!: boolean
+
+  @Column({ nullable: true })
+  emailVerificationToken?: string
+
+  @Column({ nullable: true })
+  emailVerificationExpires?: Date
+
+  @Column({ nullable: true })
+  passwordResetToken?: string
+
+  @Column({ nullable: true })
+  passwordResetExpires?: Date
+
   @CreateDateColumn()
   createdAt!: Date
 

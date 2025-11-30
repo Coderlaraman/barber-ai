@@ -7,6 +7,9 @@ import { AuditService } from '../src/modules/auth/services/audit.service'
 import { SocialAuthService } from '../src/modules/auth/services/social-auth.service'
 import { TokenBlacklistService } from '../src/modules/auth/services/token-blacklist.service'
 import { GoogleAuthService } from '../src/modules/auth/services/google-auth.service'
+import { FacebookAuthService } from '../src/modules/auth/services/facebook-auth.service'
+import { EmailService } from '../src/modules/auth/services/email.service'
+import { EmailVerificationService } from '../src/modules/auth/services/email-verification.service'
 import { User, UserRole } from '../src/modules/auth/entities/user.entity'
 import { AccessAudit } from '../src/modules/auth/entities/access-audit.entity'
 import { TokenBlacklist } from '../src/modules/auth/services/token-blacklist.service'
@@ -61,6 +64,9 @@ describe('AuthService', () => {
         SocialAuthService,
         TokenBlacklistService,
         GoogleAuthService,
+        FacebookAuthService,
+        EmailService,
+        EmailVerificationService,
         { provide: getRepositoryToken(User), useValue: repoMock },
         { provide: getRepositoryToken(AccessAudit), useValue: auditRepoMock },
         { provide: getRepositoryToken(TokenBlacklist), useValue: blacklistRepoMock }

@@ -7,6 +7,9 @@ import { LoginDto } from './dto/login.dto'
 import { LogoutDto } from './dto/logout.dto'
 import { SocialAuthDto } from './dto/social-auth.dto'
 import { AuditQueryDto } from './dto/audit-query.dto'
+import { VerifyEmailDto, ResendVerificationDto } from './dto/verify-email.dto'
+import { ForgotPasswordDto } from './dto/forgot-password.dto'
+import { ResetPasswordDto } from './dto/reset-password.dto'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { RegisterThrottlerGuard, LoginThrottlerGuard, SocialAuthThrottlerGuard } from './guards/throttle.guard'
 import { AuditService } from './services/audit.service'
@@ -292,5 +295,125 @@ export class AuthController {
     }
     
     return this.auditService.queryAudits(filters)
+  }
+
+  @Post('verify-email')
+  @ApiOperation({ 
+    summary: 'Verify email address',
+    description: `Verifies a user's email address using the token sent to their email.
+    
+    **Proceso**:
+    1. El usuario recibe un email con un token de verificación único
+    2. El usuario envía el token a este endpoint
+    3. El sistema valida el token y marca el email como verificado
+    
+    **Seguridad**: Los tokens expiran después de 24 horas por seguridad.`
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Email verified successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Email verified successfully' },
+        user: { 
+          type: 'object',
+          properties: {
+            id: { type: 'string', format: 'uuid', description: 'User ID' },
+            email: { type: 'string', format: 'email', description: 'User email' },
+            emailVerified: { type: 'boolean', description: 'Email verification status' }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.auth.verifyEmail(dto.token)
+  }
+
+  @Post('resend-verification')
+  @ApiOperation({ 
+    summary: 'Resend verification email',
+    description: `Sends a new verification email to the user.
+    
+    **Uso**: Cuando un usuario no recibe el email de verificación o el token ha expirado.
+    
+    **Limitaciones**: Solo se puede solicitar un nuevo email cada 24 horas para evitar spam.`
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Verification email sent successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Verification email sent successfully' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Email already verified or too many requests' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.auth.resendVerificationEmail(dto.email)
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ 
+    summary: 'Solicitar restablecimiento de contraseña',
+    description: `Envía un email con un enlace para restablecer la contraseña.
+    
+    **Proceso**:
+    1. El usuario solicita restablecer su contraseña
+    2. Se genera un token único y seguro
+    3. Se envía un email con el enlace de restablecimiento
+    4. El enlace expira en 1 hora por seguridad
+    
+    **Seguridad**: Los tokens expiran después de 1 hora`
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Email de restablecimiento enviado',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Password reset email sent successfully' }
+      }
+    }
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 400, description: 'Email not verified' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.auth.forgotPassword(dto.email)
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ 
+    summary: 'Restablecer contraseña con token',
+    description: `Restablece la contraseña usando el token recibido por email.
+    
+    **Requisitos de contraseña**:
+    - Mínimo 8 caracteres
+    - Al menos una mayúscula
+    - Al menos una minúscula
+    - Al menos un número
+    - Al menos un carácter especial
+    
+    **Seguridad**: El token debe ser válido y no expirado`
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Contraseña restablecida exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Password reset successfully' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.auth.resetPassword(dto.token, dto.newPassword)
   }
 }
