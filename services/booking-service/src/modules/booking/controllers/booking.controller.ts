@@ -37,6 +37,18 @@ export class BookingController {
     return this.bookingService.createBooking(createBookingDto)
   }
 
+  @Get('upcoming')
+  @ApiOperation({ summary: 'Obtener citas próximas' })
+  @ApiQuery({ name: 'days', description: 'Número de días a consultar (por defecto 7)', required: false, example: 7 })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista de citas próximas',
+    type: [BookingResponseDto]
+  })
+  async getUpcomingBookings(@Query('days') days?: number): Promise<BookingResponseDto[]> {
+    return this.bookingService.getUpcomingBookings(days)
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtener cita por ID' })
   @ApiParam({ name: 'id', description: 'ID de la cita', example: '123e4567-e89b-12d3-a456-426614174003' })
@@ -87,18 +99,6 @@ export class BookingController {
   })
   async getBookingsByDate(@Param('date') date: string): Promise<BookingResponseDto[]> {
     return this.bookingService.getBookingsByDate(date)
-  }
-
-  @Get('upcoming')
-  @ApiOperation({ summary: 'Obtener citas próximas' })
-  @ApiQuery({ name: 'days', description: 'Número de días a consultar (por defecto 7)', required: false, example: 7 })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Lista de citas próximas',
-    type: [BookingResponseDto]
-  })
-  async getUpcomingBookings(@Query('days') days?: number): Promise<BookingResponseDto[]> {
-    return this.bookingService.getUpcomingBookings(days)
   }
 
   @Put(':id/confirm')

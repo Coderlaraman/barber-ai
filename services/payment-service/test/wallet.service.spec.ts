@@ -14,20 +14,28 @@ describe('WalletService', () => {
   let dataSource: DataSource
   let eventBusService: EventBusService
 
-  const mockWallet = {
+  const createMockWallet = (balance = 100) => ({
     id: 'test-wallet-id',
     userId: 'test-user-id',
     type: WalletType.CLIENT,
-    balance: 100,
+    balance: balance,
     pendingBalance: 0,
     status: WalletStatus.ACTIVE,
     currency: 'USD',
     canDebit: jest.fn().mockReturnValue(true),
     canCredit: jest.fn().mockReturnValue(true),
-    debit: jest.fn(function(amount) { this.balance -= amount; }),
-    credit: jest.fn(function(amount) { this.balance += amount; }),
+    debit: jest.fn(function(amount) { 
+      this.balance = Number(this.balance) - Number(amount); 
+      return this;
+    }),
+    credit: jest.fn(function(amount) { 
+      this.balance = Number(this.balance) + Number(amount); 
+      return this;
+    }),
     save: jest.fn(),
-  }
+  })
+
+  let mockWallet = createMockWallet()
 
   const mockRepository = {
     create: jest.fn(),
@@ -87,6 +95,12 @@ describe('WalletService', () => {
     transactionRepository = module.get<Repository<Transaction>>(getRepositoryToken(Transaction))
     dataSource = module.get<DataSource>(DataSource)
     eventBusService = module.get<EventBusService>(EventBusService)
+  })
+
+  beforeEach(() => {
+    // Reset mock wallet before each test
+    mockWallet = createMockWallet()
+    jest.clearAllMocks()
   })
 
   afterEach(() => {
@@ -190,7 +204,10 @@ describe('WalletService', () => {
         description: 'Test debit',
       }
 
-      mockRepository.findOne.mockResolvedValue(mockWallet)
+      // Create a wallet with insufficient balance
+      const lowBalanceWallet = createMockWallet(50)
+      lowBalanceWallet.canDebit = jest.fn().mockReturnValue(false)
+      mockManager.findOne.mockResolvedValue(lowBalanceWallet)
 
       await expect(service.debitWallet(debitWalletDto)).rejects.toThrow('Insufficient balance or wallet not active')
     })
