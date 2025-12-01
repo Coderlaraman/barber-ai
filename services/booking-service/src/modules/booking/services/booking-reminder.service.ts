@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { EventBusService } from 'contracts'
+import { EventBusService } from '@barber_ai/contracts'
 import { BookingService } from './booking.service'
 
 @Injectable()

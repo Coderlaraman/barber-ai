@@ -19,6 +19,24 @@ export class CreatePortfolioItemDto {
   title!: string
 
   @ApiProperty({
+    description: 'Descripción del trabajo/portfolio',
+    example: 'Corte clásico con degradado perfecto para caballeros',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  description?: string
+
+  @ApiProperty({
+    description: 'URL de la imagen del trabajo',
+    example: 'https://example.com/image.jpg',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string
+
+  @ApiProperty({
     description: 'Array de etiquetas/tags para categorizar el trabajo',
     example: ['corte-clasico', 'degradado', 'hombre'],
     required: false,

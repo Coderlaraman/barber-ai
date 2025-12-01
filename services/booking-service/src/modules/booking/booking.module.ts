@@ -5,7 +5,7 @@ import { BookingService } from './services/booking.service'
 import { Booking } from './entities/booking.entity'
 import { BookingEventProcessor } from './services/booking-event.processor'
 import { BookingReminderService } from './services/booking-reminder.service'
-import { EventBusService } from 'contracts'
+import { EventBusService } from '@barber_ai/contracts'
 
 @Module({
   imports: [TypeOrmModule.forFeature([Booking])],

@@ -28,6 +28,20 @@ export class PortfolioItemResponseDto {
   tags?: string[]
 
   @ApiProperty({
+    description: 'Descripción del trabajo/portfolio',
+    example: 'Corte clásico con degradado perfecto para caballeros',
+    required: false,
+  })
+  description?: string
+
+  @ApiProperty({
+    description: 'URL de la imagen del trabajo',
+    example: 'https://example.com/image.jpg',
+    required: false,
+  })
+  imageUrl?: string
+
+  @ApiProperty({
     description: 'Fecha de creación',
     example: '2023-12-01T10:00:00.000Z',
   })

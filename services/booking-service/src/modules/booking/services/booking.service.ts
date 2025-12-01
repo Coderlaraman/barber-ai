@@ -1,7 +1,7 @@
 import { Injectable, Logger, ConflictException, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { EventBusService } from 'contracts'
+import { EventBusService } from '@barber_ai/contracts'
 import { Booking, BookingStatus } from '../entities/booking.entity'
 import { CreateBookingDto } from '../dto/create-booking.dto'
 import { UpdateBookingDto } from '../dto/update-booking.dto'
@@ -141,6 +141,42 @@ export class BookingService {
     return this.toResponseDto(updatedBooking)
   }
 
+  async completeBooking(bookingId: string): Promise<BookingResponseDto> {
+    const booking = await this.bookingRepository.findOne({ where: { id: bookingId } })
+    
+    if (!booking) {
+      throw new NotFoundException('Cita no encontrada')
+    }
+
+    if (booking.status !== 'CONFIRMED') {
+      throw new ConflictException('La cita debe estar confirmada para poder completarla')
+    }
+
+    booking.status = 'COMPLETED'
+    booking.updatedAt = new Date()
+
+    const updatedBooking = await this.bookingRepository.save(booking)
+
+    // Publicar evento de completación
+    await this.eventBus.publish({
+      eventId: `booking-completed-${updatedBooking.id}`,
+      eventType: 'booking.completed',
+      aggregateId: updatedBooking.id,
+      aggregateType: 'BOOKING',
+      payload: {
+        appointmentId: updatedBooking.id,
+        barberId: updatedBooking.barberId,
+        clientId: updatedBooking.clientId,
+        completedAt: updatedBooking.updatedAt.toISOString()
+      },
+      timestamp: new Date().toISOString(),
+      version: 1
+    })
+
+    this.logger.log(`Cita completada: ${updatedBooking.id}`)
+    return this.toResponseDto(updatedBooking)
+  }
+
   async rescheduleBooking(
     bookingId: string, 
     newDate: string, 
@@ -225,6 +261,23 @@ export class BookingService {
       order: { date: 'DESC', startTime: 'DESC' }
     })
     
+    return bookings.map(booking => this.toResponseDto(booking))
+  }
+
+  async getUpcomingBookings(days: number = 7): Promise<BookingResponseDto[]> {
+    const today = new Date()
+    const futureDate = new Date()
+    futureDate.setDate(today.getDate() + days)
+
+    const bookings = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .where('booking.date >= :today', { today: today.toISOString().split('T')[0] })
+      .andWhere('booking.date <= :futureDate', { futureDate: futureDate.toISOString().split('T')[0] })
+      .andWhere('booking.status != :cancelledStatus', { cancelledStatus: 'CANCELLED' })
+      .orderBy('booking.date', 'ASC')
+      .addOrderBy('booking.startTime', 'ASC')
+      .getMany()
+
     return bookings.map(booking => this.toResponseDto(booking))
   }
 

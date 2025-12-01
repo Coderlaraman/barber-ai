@@ -36,6 +36,8 @@ export class PortfolioController {
       id: '123e4567-e89b-12d3-a456-426614174000',
       barberId: dto.barberId,
       title: dto.title,
+      description: dto.description,
+      imageUrl: dto.imageUrl,
       tags: dto.tags,
       createdAt: new Date()
     }
@@ -84,9 +86,7 @@ export class PortfolioController {
       description: dto.description || 'Descripción actualizada',
       imageUrl: dto.imageUrl || 'https://example.com/updated-image.jpg',
       tags: dto.tags || ['actualizado', 'modificado'],
-      metadata: dto.metadata || { actualizado: new Date().toISOString() },
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date()
+      createdAt: new Date('2024-01-01')
     }
   }
 
@@ -126,8 +126,8 @@ export class PortfolioController {
   })
   getPortfolioItems(
     @Param('barberId') barberId: string,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number
+    @Query('limit') _limit?: number,
+    @Query('offset') _offset?: number
   ): PortfolioItemResponseDto[] {
     // Stub implementation - replace with actual service call
     return [
@@ -135,6 +135,8 @@ export class PortfolioController {
         id: '123e4567-e89b-12d3-a456-426614174001',
         barberId: barberId,
         title: 'Corte clásico con degradado',
+        description: 'Corte clásico con degradado perfecto para caballeros',
+        imageUrl: 'https://example.com/image.jpg',
         tags: ['corte-clasico', 'degradado', 'hombre'],
         createdAt: new Date()
       }
@@ -173,8 +175,8 @@ export class PortfolioController {
   })
   searchPortfolioItems(
     @Param('barberId') barberId: string,
-    @Query('query') query: string,
-    @Query('tags') tags?: string
+    @Query('query') _query: string,
+    @Query('tags') _tags?: string
   ): PortfolioItemResponseDto[] {
     // Stub implementation - replace with actual service call
     return [
@@ -182,6 +184,8 @@ export class PortfolioController {
         id: '123e4567-e89b-12d3-a456-426614174002',
         barberId: barberId,
         title: 'Corte clásico moderno',
+        description: 'Corte clásico con toque moderno y elegante',
+        imageUrl: 'https://example.com/modern-image.jpg',
         tags: ['corte-clasico', 'moderno', 'hombre'],
         createdAt: new Date()
       }
@@ -213,7 +217,7 @@ export class PortfolioController {
     status: 404,
     description: 'Elemento no encontrado'
   })
-  deleteItem(@Param('itemId') itemId: string): { success: boolean; message: string } {
+  deleteItem(@Param('itemId') _itemId: string): { success: boolean; message: string } {
     // Stub implementation - replace with actual service call
     return {
       success: true,

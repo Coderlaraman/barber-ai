@@ -89,6 +89,18 @@ export class BookingController {
     return this.bookingService.getBookingsByDate(date)
   }
 
+  @Get('upcoming')
+  @ApiOperation({ summary: 'Obtener citas próximas' })
+  @ApiQuery({ name: 'days', description: 'Número de días a consultar (por defecto 7)', required: false, example: 7 })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista de citas próximas',
+    type: [BookingResponseDto]
+  })
+  async getUpcomingBookings(@Query('days') days?: number): Promise<BookingResponseDto[]> {
+    return this.bookingService.getUpcomingBookings(days)
+  }
+
   @Put(':id/confirm')
   @ApiOperation({ summary: 'Confirmar una cita' })
   @ApiParam({ name: 'id', description: 'ID de la cita', example: '123e4567-e89b-12d3-a456-426614174003' })
@@ -137,6 +149,26 @@ export class BookingController {
     @Query('cancelledBy') cancelledBy: string
   ): Promise<BookingResponseDto> {
     return this.bookingService.cancelBooking(id, reason, cancelledBy)
+  }
+
+  @Put(':id/complete')
+  @ApiOperation({ summary: 'Completar una cita' })
+  @ApiParam({ name: 'id', description: 'ID de la cita', example: '123e4567-e89b-12d3-a456-426614174003' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Cita completada exitosamente',
+    type: BookingResponseDto
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Cita no encontrada'
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'La cita debe estar confirmada para poder completarla'
+  })
+  async completeBooking(@Param('id') id: string): Promise<BookingResponseDto> {
+    return this.bookingService.completeBooking(id)
   }
 
   @Put(':id/reschedule')
