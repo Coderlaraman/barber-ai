@@ -55,8 +55,11 @@ services:
       NODE_ENV: development
       PORT: "8085"
       AUTH_SERVICE_URL: http://auth-service:3005
+      USER_SERVICE_URL: http://user-service:3003
     depends_on:
       auth-service:
+        condition: service_healthy
+      user-service:
         condition: service_healthy
       booking-service:
         condition: service_healthy
@@ -177,6 +180,28 @@ services:
       - "3005"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3005/search/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: "3003"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: barber
+      DB_PASSWORD: barber
+      DB_DATABASE: barberai_users
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "3003"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3003/users"]
       interval: 10s
       timeout: 5s
       retries: 5
