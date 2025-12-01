@@ -58,6 +58,8 @@ services:
     depends_on:
       auth-service:
         condition: service_healthy
+      booking-service:
+        condition: service_healthy
       scheduler-service:
         condition: service_healthy
       notifications-service:
@@ -95,6 +97,31 @@ services:
       - "3005"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3005/scheduler/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  booking-service:
+    build:
+      context: .
+      dockerfile: services/booking-service/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: "3002"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: barber
+      DB_PASSWORD: barber
+      DB_NAME: barber
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "3002"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3002/booking/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -176,6 +203,12 @@ services:
       context: ./services/ai-recommender-service
     environment:
       PYTHONUNBUFFERED: "1"
+      REDIS_URL: redis://redis:6379
+      ENVIRONMENT: development
+      LOG_LEVEL: INFO
+    depends_on:
+      redis:
+        condition: service_healthy
     expose:
       - "8000"
     healthcheck:

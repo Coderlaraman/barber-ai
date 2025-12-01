@@ -36,7 +36,7 @@ async function bootstrap() {
     .setContact(
       'BarberIA Team',
       'https://github.com/barberia',
-      'support@barberia.com'
+      'support@barber_ai.com'
     )
     .setLicense('MIT', 'https://opensource.org/licenses/MIT')
     .setExternalDoc('Documentación adicional', 'https://docs.barberia.com')

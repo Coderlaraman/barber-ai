@@ -10,9 +10,9 @@ const mockConfigService = {
       'SMTP_SECURE': false,
       'SMTP_USER': null, // Will trigger mock transport
       'SMTP_PASSWORD': null,
-      'SMTP_FROM': 'noreply@barberia.com',
+      'SMTP_FROM': 'noreply@barber_ai.com',
       'APP_NAME': 'Barbería',
-      'SUPPORT_EMAIL': 'support@barberia.com',
+      'SUPPORT_EMAIL': 'support@barber_ai.com',
       'year': new Date().getFullYear()
     }
     return config[key] ?? defaultValue

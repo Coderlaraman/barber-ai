@@ -74,7 +74,7 @@ export class EmailService {
       }
 
       const mailOptions = {
-        from: options.from || this.configService.get<string>('SMTP_FROM', 'noreply@barberia.com'),
+        from: options.from || this.configService.get<string>('SMTP_FROM', 'noreply@barber_ai.com'),
         to: options.to,
         subject: subject,
         html: html,
@@ -135,7 +135,7 @@ export class EmailService {
     return {
       appName: this.configService.get<string>('APP_NAME', 'Barbería'),
       year: new Date().getFullYear(),
-      supportEmail: this.configService.get<string>('SUPPORT_EMAIL', 'support@barberia.com'),
+      supportEmail: this.configService.get<string>('SUPPORT_EMAIL', 'support@barber_ai.com'),
     }
   }
 

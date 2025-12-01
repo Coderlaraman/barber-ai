@@ -1,5 +1,5 @@
 {
-  "name": "barber_ai",
+  "name": "@barber_ai/monorepo",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,10 +10,23 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.48.0",
     "@typescript-eslint/parser": "^8.48.0",
-    "eslint": "^9.39.1"
+    "eslint": "^9.39.1",
+    "typescript": "^5.6.2",
+    "@types/node": "^20.16.5",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.13",
+    "ts-jest": "^29.2.5",
+    "@nestjs/testing": "^10.4.4"
   },
   "scripts": {
-    "lint:all": "npm run -w services/auth-service lint && npm run -w services/api-gateway lint && npm run -w services/scheduler-service lint && npm run -w services/portfolio-service lint && npm run -w services/search-service lint && npm run -w services/ranking-service lint && npm run -w services/notifications-service lint",
-    "typecheck:all": "npm run -w services/auth-service typecheck && npm run -w services/api-gateway typecheck && npm run -w services/scheduler-service typecheck && npm run -w services/portfolio-service typecheck && npm run -w services/search-service typecheck && npm run -w services/ranking-service typecheck && npm run -w services/notifications-service typecheck"
+    "build:all": "npm run build --workspaces",
+    "lint:all": "npm run lint --workspaces --if-present",
+    "typecheck:all": "npm run typecheck --workspaces --if-present",
+    "test:all": "npm test --workspaces --if-present",
+    "clean:all": "npm run clean --workspaces --if-present",
+    "dev:booking": "npm run dev -w @barber_ai/booking-service",
+    "dev:notifications": "npm run dev -w @barber_ai/notifications-service"
   }
 }

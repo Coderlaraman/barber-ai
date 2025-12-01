@@ -1,8 +1,7 @@
 {
-  "name": "barberia-contracts",
+  "name": "@barber_ai/contracts",
   "version": "0.1.0",
-  "private": true,
-  "type": "commonjs",
+  "description": "Contratos compartidos para BarberIA",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -11,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.4",

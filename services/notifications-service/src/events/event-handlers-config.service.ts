@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common'
-import { EventBusService } from 'contracts'
+import { EventBusService } from '@barber_ai/contracts'
 import { NotificationEventHandler } from './notification-event.handler'
 
 /**

@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { EventHandler } from 'contracts'
-import { DomainEvent } from 'contracts'
+import { EventHandler, DomainEvent } from '@barber_ai/contracts'
 import { NotificationService } from '../modules/notifications/services/notification.service'
 import { NotificationType, NotificationChannel } from '../modules/notifications/enums/notification.enum'
 

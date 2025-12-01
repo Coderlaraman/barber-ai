@@ -1,21 +1,23 @@
 {
-  "name": "booking-service",
+  "name": "@barber_ai/booking-service",
   "version": "0.1.0",
   "description": "Servicio de gestión de citas para BarberIA",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "start:dev": "npx ts-node-dev --respawn --transpile-only src/main.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
     "start:prod": "node dist/main.js",
     "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "migration:create": "typeorm migration:create",
     "migration:generate": "typeorm migration:generate",
-    "migration:run": "npx ts-node migrate.ts",
-    "migration:revert": "typeorm migration:revert"
+    "migration:run": "ts-node migrate.ts",
+    "migration:revert": "typeorm migration:revert",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@nestjs/common": "10.3.8",
@@ -31,7 +33,7 @@
     "class-transformer": "0.5.1",
     "reflect-metadata": "0.2.2",
     "rxjs": "7.8.1",
-    "contracts": "file:../../packages/contracts",
+    "@barber_ai/contracts": "file:../../packages/contracts",
     "ioredis": "5.4.1"
   },
   "devDependencies": {

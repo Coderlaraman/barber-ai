@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { BookingEventHandler } from 'contracts'
 import { BookingService } from './booking.service'
 import { BookingCreatedEvent, BookingCancelledEvent, BookingRescheduledEvent, BookingConfirmedEvent } from 'contracts'
@@ -9,7 +9,6 @@ import { BookingCreatedEvent, BookingCancelledEvent, BookingRescheduledEvent, Bo
  */
 @Injectable()
 export class BookingEventProcessor extends BookingEventHandler<BookingCreatedEvent | BookingCancelledEvent | BookingRescheduledEvent | BookingConfirmedEvent> {
-  protected readonly logger = new Logger(BookingEventProcessor.name)
 
   constructor(private readonly bookingService: BookingService) {
     super()
