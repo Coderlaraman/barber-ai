@@ -40,7 +40,45 @@ import { UserNotificationPreference } from './entities/user-notification-prefere
     {
       provide: 'UserNotificationPreferenceRepository',
       useValue: {
-        findOne: async (): Promise<any> => null,
+        findOne: async (): Promise<any> => ({
+          id: 'mock-preference-id',
+          userId: 'mock-user-id',
+          emailEnabled: true,
+          pushEnabled: true,
+          smsEnabled: false,
+          inAppEnabled: true,
+          appointmentReminders: true,
+          promotionalEmails: true,
+          bookingConfirmations: true,
+          paymentNotifications: true,
+          reviewRequests: true,
+          systemUpdates: true,
+          quietHoursStart: null,
+          quietHoursEnd: null,
+          timezone: 'America/Mexico_City',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          isChannelEnabled: (channel: any) => {
+            switch (channel) {
+              case 'email': return true
+              case 'push': return true
+              case 'sms': return false
+              case 'in_app': return true
+              default: return false
+            }
+          },
+          isNotificationTypeEnabled: (type: string) => {
+            switch (type) {
+              case 'appointment_reminder': return true
+              case 'promotional': return true
+              case 'booking_confirmation': return true
+              case 'payment': return true
+              case 'review_request': return true
+              case 'system_update': return true
+              default: return true
+            }
+          }
+        }),
         find: async (): Promise<any[]> => [],
         save: async (entity: any): Promise<any> => entity,
         create: (entity: any): any => entity,

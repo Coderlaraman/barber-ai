@@ -5,27 +5,20 @@ import { ScheduleModule } from '@nestjs/schedule'
 import { CompleteEventsModule, EventBusService } from 'contracts'
 import { BookingModule } from './booking/booking.module'
 import { BookingEventProcessor } from './booking/services/booking-event.processor'
+import { databaseConfig } from '../config/database.config'
+import { HealthModule } from './health/health.module'
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: Number(process.env.DB_PORT) || 5432,
-      username: process.env.DB_USERNAME || 'postgres',
-      password: process.env.DB_PASSWORD || 'password',
-      database: process.env.DB_NAME || 'barberia_booking',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: process.env.NODE_ENV !== 'production',
-      logging: process.env.NODE_ENV === 'development'
-    }),
+    TypeOrmModule.forRoot(databaseConfig()),
     ScheduleModule.forRoot(),
     CompleteEventsModule.forRoot({
       enableDeadLetterQueue: true,
       useInMemoryStore: false
     }),
-    BookingModule
+    BookingModule,
+    HealthModule
   ],
   providers: [BookingEventProcessor]
 })

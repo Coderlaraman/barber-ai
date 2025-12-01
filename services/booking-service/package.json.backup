@@ -11,11 +11,7 @@
     "lint": "eslint src/**/*.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "migration:create": "typeorm migration:create",
-    "migration:generate": "typeorm migration:generate",
-    "migration:run": "npx ts-node migrate.ts",
-    "migration:revert": "typeorm migration:revert"
+    "test:cov": "jest --coverage"
   },
   "dependencies": {
     "@nestjs/common": "10.3.8",
@@ -35,16 +31,16 @@
     "ioredis": "5.4.1"
   },
   "devDependencies": {
-    "@types/node": "20.12.12",
-    "@types/express": "4.17.21",
-    "typescript": "5.4.5",
-    "ts-node": "10.9.2",
-    "ts-node-dev": "2.0.0",
-    "@typescript-eslint/eslint-plugin": "6.21.0",
-    "@typescript-eslint/parser": "6.21.0",
-    "eslint": "8.57.0",
-    "jest": "29.7.0",
-    "@types/jest": "29.5.12",
-    "ts-jest": "29.1.2"
+    "@types/node": "^20.0.0",
+    "@types/express": "^4.17.17",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.42.0",
+    "jest": "^29.5.0",
+    "@types/jest": "^29.5.2",
+    "ts-jest": "^29.1.0"
   }
 }
