@@ -56,6 +56,7 @@ services:
       PORT: "8085"
       AUTH_SERVICE_URL: http://auth-service:3005
       USER_SERVICE_URL: http://user-service:3003
+      BARBER_SERVICE_URL: http://barber-service:3007
     depends_on:
       auth-service:
         condition: service_healthy
@@ -202,6 +203,28 @@ services:
       - "3003"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3003/users"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  barber-service:
+    build:
+      context: .
+      dockerfile: services/barber-service/Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: "3007"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: barber
+      DB_PASSWORD: barber
+      DB_DATABASE: barberai_barbers
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "3007"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3007/barbers"]
       interval: 10s
       timeout: 5s
       retries: 5

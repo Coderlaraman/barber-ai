@@ -34,6 +34,9 @@ async function bootstrap() {
   expressApp.use('/docs/ranking', swaggerUi.serve, swaggerUi.setup(undefined, {
     swaggerOptions: { url: '/docs-json/ranking' }
   }))
+  expressApp.use('/docs/barber', swaggerUi.serve, swaggerUi.setup(undefined, {
+    swaggerOptions: { url: '/docs-json/barber' }
+  }))
 
   expressApp.get('/docs-json/:service', async (req: any, res: any) => {
     const service = String(req.params.service || '').toLowerCase()
@@ -66,6 +69,7 @@ async function bootstrap() {
       { key: 'portfolio', label: 'Portfolio', base: 'http://portfolio-service:3004', health: '/portfolio/health' },
       { key: 'search', label: 'Search', base: 'http://search-service:3005', health: '/search/health' },
       { key: 'ranking', label: 'Ranking', base: 'http://ranking-service:3006', health: '/ranking/health' },
+      { key: 'barber', label: 'Barber', base: 'http://barber-service:3007', health: '/barbers' },
       { key: 'ai', label: 'AI Recommender', base: 'http://ai-recommender-service:8000', health: '/health' }
     ]
     const withTimeout = async (url: string) => {
@@ -150,6 +154,14 @@ async function bootstrap() {
       pathRewrite: (path) => path.replace(/^\/docs-json\/ranking/, '/docs-json')
     })
   )
+  expressApp.use(
+    '/docs-json/barber',
+    createProxyMiddleware({
+      target: 'http://barber-service:3007',
+      changeOrigin: true,
+      pathRewrite: (path) => path.replace(/^\/docs-json\/barber/, '/docs-json')
+    })
+  )
   app.use('/docs/ai', swaggerUi.serve, swaggerUi.setup(undefined, {
     swaggerOptions: { url: '/docs-json/ai' }
   }))
@@ -218,6 +230,33 @@ async function bootstrap() {
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => (path.startsWith('/ranking') ? path : `/ranking${path}`)
+    })
+  )
+  app.use(
+    '/barbers',
+    createProxyMiddleware({
+      target: 'http://barber-service:3007',
+      changeOrigin: true,
+      ws: true,
+      pathRewrite: (path) => (path.startsWith('/barbers') ? path : `/barbers${path}`)
+    })
+  )
+  app.use(
+    '/specialties',
+    createProxyMiddleware({
+      target: 'http://barber-service:3007',
+      changeOrigin: true,
+      ws: true,
+      pathRewrite: (path) => (path.startsWith('/specialties') ? path : `/specialties${path}`)
+    })
+  )
+  app.use(
+    '/services',
+    createProxyMiddleware({
+      target: 'http://barber-service:3007',
+      changeOrigin: true,
+      ws: true,
+      pathRewrite: (path) => (path.startsWith('/services') ? path : `/services${path}`)
     })
   )
   app.use(
