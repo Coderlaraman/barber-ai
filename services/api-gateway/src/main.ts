@@ -34,8 +34,14 @@ async function bootstrap() {
   expressApp.use('/docs/ranking', swaggerUi.serve, swaggerUi.setup(undefined, {
     swaggerOptions: { url: '/docs-json/ranking' }
   }))
-  expressApp.use('/docs/barber', swaggerUi.serve, swaggerUi.setup(undefined, {
+  expressApp.use('/docs-json/barber', swaggerUi.serve, swaggerUi.setup(undefined, {
     swaggerOptions: { url: '/docs-json/barber' }
+  }))
+  expressApp.use('/docs-json/rating', swaggerUi.serve, swaggerUi.setup(undefined, {
+    swaggerOptions: { url: '/docs-json/rating' }
+  }))
+  expressApp.use('/docs/rating', swaggerUi.serve, swaggerUi.setup(undefined, {
+    swaggerOptions: { url: '/docs-json/rating' }
   }))
 
   expressApp.get('/docs-json/:service', async (req: any, res: any) => {
@@ -47,6 +53,8 @@ async function bootstrap() {
       portfolio: 'http://portfolio-service:3004',
       search: 'http://search-service:3005',
       ranking: 'http://ranking-service:3006',
+      barber: 'http://barber-service:3007',
+      rating: 'http://rating-review-service:3008',
       ai: 'http://ai-recommender-service:8000'
     }
     const base = map[service]
@@ -70,6 +78,7 @@ async function bootstrap() {
       { key: 'search', label: 'Search', base: 'http://search-service:3005', health: '/search/health' },
       { key: 'ranking', label: 'Ranking', base: 'http://ranking-service:3006', health: '/ranking/health' },
       { key: 'barber', label: 'Barber', base: 'http://barber-service:3007', health: '/barbers' },
+      { key: 'rating', label: 'Rating & Reviews', base: 'http://rating-review-service:3008', health: '/ratings' },
       { key: 'ai', label: 'AI Recommender', base: 'http://ai-recommender-service:8000', health: '/health' }
     ]
     const withTimeout = async (url: string) => {
@@ -160,6 +169,14 @@ async function bootstrap() {
       target: 'http://barber-service:3007',
       changeOrigin: true,
       pathRewrite: (path) => path.replace(/^\/docs-json\/barber/, '/docs-json')
+    })
+  )
+  expressApp.use(
+    '/docs-json/rating',
+    createProxyMiddleware({
+      target: 'http://rating-review-service:3008',
+      changeOrigin: true,
+      pathRewrite: (path) => path.replace(/^\/docs-json\/rating/, '/docs-json')
     })
   )
   app.use('/docs/ai', swaggerUi.serve, swaggerUi.setup(undefined, {
@@ -257,6 +274,15 @@ async function bootstrap() {
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => (path.startsWith('/services') ? path : `/services${path}`)
+    })
+  )
+  app.use(
+    '/ratings',
+    createProxyMiddleware({
+      target: 'http://rating-review-service:3008',
+      changeOrigin: true,
+      ws: true,
+      pathRewrite: (path) => (path.startsWith('/ratings') ? path : `/ratings${path}`)
     })
   )
   app.use(

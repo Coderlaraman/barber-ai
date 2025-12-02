@@ -184,7 +184,19 @@ npm run test:e2e
 npm run test:cov
 ```
 
-## 📚 Documentación de Servicios
+## 📚 Documentación
+
+### Política de Documentación
+
+**⚠️ IMPORTANTE**: Todos los nuevos endpoints DEBEN seguir nuestra [Política de Documentación Obligatoria](./docs/documentation-policy.md). Esta política establece estándares para:
+
+- Documentación TSDoc completa
+- Decoradores Swagger/OpenAPI obligatorios
+- DTOs documentados con ejemplos
+- Manejo de errores documentado
+- Checklist de verificación antes de PRs
+
+### Documentación de Servicios
 
 Para documentación detallada de cada servicio, consulte:
 

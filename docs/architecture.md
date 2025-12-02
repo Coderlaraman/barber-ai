@@ -1482,6 +1482,18 @@ export class BookingController {
 }
 ```
 
+### Política de Documentación Obligatoria
+
+**⚠️ IMPORTANTE**: Para mantener la calidad y consistencia del código, se ha establecido una [Política de Documentación Obligatoria](./documentation-policy.md) que todos los nuevos endpoints deben seguir. Esta política incluye:
+
+- **Documentación TSDoc completa** con descripciones detalladas, parámetros, retornos y ejemplos
+- **Decoradores Swagger/OpenAPI** para todos los endpoints, incluyendo todas las respuestas posibles
+- **DTOs documentados** con validaciones y ejemplos
+- **Manejo de errores documentado** con todas las excepciones posibles
+- **Checklist de verificación** antes de crear Pull Requests
+
+Los desarrolladores deben consultar esta política antes de crear nuevos endpoints para asegurar el cumplimiento de los estándares establecidos.
+
 ---
 
 Esta arquitectura de microservicios proporciona una base sólida para el sistema BarberIA, con énfasis en escalabilidad, mantenibilidad y resiliencia. Cada servicio puede ser desarrollado, desplegado y escalado independientemente, mientras mantiene la cohesión del sistema completo a través de patrones de comunicación bien definidos.
