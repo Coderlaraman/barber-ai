@@ -17,7 +17,7 @@ async function bootstrap() {
   app.getHttpAdapter().getInstance().get('/docs-json', (req: any, res: any) => {
     res.json(document)
   })
-  await app.listen(process.env.PORT ? Number(process.env.PORT) : 3002)
+  await app.listen(process.env.PORT ? Number(process.env.PORT) : 3011)
 }
 
 bootstrap()

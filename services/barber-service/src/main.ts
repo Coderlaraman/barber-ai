@@ -38,7 +38,7 @@ async function bootstrap() {
     res.json(document);
   });
 
-  const port = configService.get('PORT', 3002);
+  const port = configService.get('PORT', 3003);
   await app.listen(port);
   
   console.log(`Barber Service is running on: http://localhost:${port}`);

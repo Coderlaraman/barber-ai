@@ -200,4 +200,21 @@ export class BookingController {
   ): Promise<BookingResponseDto> {
     return this.bookingService.rescheduleBooking(id, newDate, newStartTime, newEndTime, reason)
   }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Actualizar una cita' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Cita actualizada exitosamente',
+    type: BookingResponseDto
+  })
+  async updateBooking(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto): Promise<BookingResponseDto> {
+    return this.bookingService.updateBooking(id, updateBookingDto)
+  }
+
+  @Get('health')
+  @ApiOperation({ summary: 'Health check' })
+  health() {
+    return { status: 'ok', service: 'booking' }
+  }
 }

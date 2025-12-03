@@ -19,7 +19,7 @@ export class CreateRatingDto {
   @IsUUID()
   serviceId: string;
 
-  @ApiProperty({ description: 'Tipo de calificación', enum: RatingType, default: RatingType.APPOINTMENT })
+  @ApiProperty({ description: 'Tipo de calificación', enum: RatingType, default: RatingType.SERVICE })
   @IsEnum(RatingType)
   @IsOptional()
   type?: RatingType;

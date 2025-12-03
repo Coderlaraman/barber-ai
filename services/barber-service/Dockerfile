@@ -3,11 +3,11 @@ WORKDIR /app
 COPY packages/contracts ./packages/contracts
 RUN npm --prefix packages/contracts install --no-audit --no-fund \
   && npm --prefix packages/contracts run build
-COPY services/booking-service/package.json ./
+COPY services/barber-service/package.json ./
 RUN npm install --no-audit --no-fund
-COPY services/booking-service/tsconfig.json ./
-COPY services/booking-service/src ./src
+COPY services/barber-service/tsconfig.json ./
+COPY services/barber-service/src ./src
 RUN npm run build
-ENV PORT=3007
-EXPOSE 3007
+ENV PORT=3003
+EXPOSE 3003
 CMD ["node", "dist/main.js"]

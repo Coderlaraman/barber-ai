@@ -13,7 +13,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }))
 
-  const port = configService.get('PORT', 3004)
+  const port = configService.get('PORT', 3010)
   await app.listen(port)
   
   console.log(`Payment service running on port ${port}`)

@@ -89,6 +89,23 @@ export class AvailabilityController {
     await this.availabilityDomainService.deleteAvailability(id, userId);
   }
 
+  @Get('check')
+  @ApiOperation({ summary: 'Verificar disponibilidad de un slot' })
+  @ApiQuery({ name: 'barberId', required: true })
+  @ApiQuery({ name: 'date', required: true, description: 'YYYY-MM-DD' })
+  @ApiQuery({ name: 'startTime', required: true, description: 'HH:mm' })
+  @ApiQuery({ name: 'endTime', required: true, description: 'HH:mm' })
+  async checkAvailability(
+    @Query('barberId') barberId: string,
+    @Query('date') date: string,
+    @Query('startTime') startTime: string,
+    @Query('endTime') endTime: string,
+  ): Promise<{ available: boolean }> {
+    // TODO: Implementar lógica real de verificación contra TimeSlots y Blocks
+    // Por ahora devolvemos true para permitir el flujo
+    return { available: true };
+  }
+
   @Post('generate-slots')
   @ApiOperation({ summary: 'Generar franjas horarias para un rango de fechas' })
   @ApiResponse({ status: HttpStatus.OK, description: 'Franjas horarias generadas exitosamente' })

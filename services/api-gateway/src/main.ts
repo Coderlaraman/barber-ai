@@ -48,14 +48,15 @@ async function bootstrap() {
     const service = String(req.params.service || '').toLowerCase()
     const map: Record<string, string> = {
       auth: process.env.AUTH_SERVICE_URL || 'http://auth-service:3001',
-      scheduler: 'http://scheduler-service:3002',
-      notifications: 'http://notifications-service:3003',
+      scheduler: 'http://scheduler-service:3011',
+      notifications: 'http://notifications-service:3009',
       portfolio: 'http://portfolio-service:3004',
       search: 'http://search-service:3005',
       ranking: 'http://ranking-service:3006',
-      barber: 'http://barber-service:3007',
+      barber: 'http://barber-service:3003',
       rating: 'http://rating-review-service:3008',
-      ai: 'http://ai-recommender-service:8000'
+      ai: 'http://ai-recommender-service:8000',
+      booking: 'http://booking-service:3007'
     }
     const base = map[service]
     if (!base) return res.status(404).json({ message: 'Unknown service', service })
@@ -72,14 +73,15 @@ async function bootstrap() {
   expressApp.get('/', async (req: any, res: any) => {
     const services = [
       { key: 'auth', label: 'Auth', base: process.env.AUTH_SERVICE_URL || 'http://auth-service:3001', health: '/auth/health' },
-      { key: 'scheduler', label: 'Scheduler', base: 'http://scheduler-service:3002', health: '/scheduler/health' },
-      { key: 'notifications', label: 'Notifications', base: 'http://notifications-service:3003', health: '/notifications/health' },
+      { key: 'scheduler', label: 'Scheduler', base: 'http://scheduler-service:3011', health: '/scheduler/health' },
+      { key: 'notifications', label: 'Notifications', base: 'http://notifications-service:3009', health: '/notifications/health' },
       { key: 'portfolio', label: 'Portfolio', base: 'http://portfolio-service:3004', health: '/portfolio/health' },
       { key: 'search', label: 'Search', base: 'http://search-service:3005', health: '/search/health' },
       { key: 'ranking', label: 'Ranking', base: 'http://ranking-service:3006', health: '/ranking/health' },
-      { key: 'barber', label: 'Barber', base: 'http://barber-service:3007', health: '/barbers' },
+      { key: 'barber', label: 'Barber', base: 'http://barber-service:3003', health: '/barbers' },
       { key: 'rating', label: 'Rating & Reviews', base: 'http://rating-review-service:3008', health: '/ratings' },
-      { key: 'ai', label: 'AI Recommender', base: 'http://ai-recommender-service:8000', health: '/health' }
+      { key: 'ai', label: 'AI Recommender', base: 'http://ai-recommender-service:8000', health: '/health' },
+      { key: 'booking', label: 'Booking', base: 'http://booking-service:3007', health: '/booking/health' }
     ]
     const withTimeout = async (url: string) => {
       const c = new AbortController()
@@ -118,7 +120,7 @@ async function bootstrap() {
   expressApp.use(
     '/docs-json/scheduler',
     createProxyMiddleware({
-      target: 'http://scheduler-service:3002',
+      target: 'http://scheduler-service:3011',
       changeOrigin: true,
       pathRewrite: (path) => path.replace(/^\/docs-json\/scheduler/, '/docs-json')
     })
@@ -134,7 +136,7 @@ async function bootstrap() {
   expressApp.use(
     '/docs-json/notifications',
     createProxyMiddleware({
-      target: 'http://notifications-service:3003',
+      target: 'http://notifications-service:3009',
       changeOrigin: true,
       pathRewrite: (path) => path.replace(/^\/docs-json\/notifications/, '/docs-json')
     })
@@ -166,7 +168,7 @@ async function bootstrap() {
   expressApp.use(
     '/docs-json/barber',
     createProxyMiddleware({
-      target: 'http://barber-service:3007',
+      target: 'http://barber-service:3003',
       changeOrigin: true,
       pathRewrite: (path) => path.replace(/^\/docs-json\/barber/, '/docs-json')
     })
@@ -187,7 +189,7 @@ async function bootstrap() {
   app.use(
     '/appointments',
     createProxyMiddleware({
-      target: 'http://scheduler-service:3002',
+      target: 'http://booking-service:3007',
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => path.startsWith('/appointments') ? path : `/appointments${path}`
@@ -197,7 +199,7 @@ async function bootstrap() {
   app.use(
     '/availability',
     createProxyMiddleware({
-      target: 'http://scheduler-service:3002',
+      target: 'http://scheduler-service:3011',
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => path.startsWith('/availability') ? path : `/availability${path}`
@@ -207,7 +209,7 @@ async function bootstrap() {
   app.use(
     '/scheduler',
     createProxyMiddleware({
-      target: 'http://scheduler-service:3002',
+      target: 'http://scheduler-service:3011',
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => (path.startsWith('/scheduler') ? path : `/scheduler${path}`)
@@ -216,7 +218,7 @@ async function bootstrap() {
   app.use(
     '/notifications',
     createProxyMiddleware({
-      target: 'http://notifications-service:3003',
+      target: 'http://notifications-service:3009',
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => (path.startsWith('/notifications') ? path : `/notifications${path}`)
@@ -252,7 +254,7 @@ async function bootstrap() {
   app.use(
     '/barbers',
     createProxyMiddleware({
-      target: 'http://barber-service:3007',
+      target: 'http://barber-service:3003',
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => (path.startsWith('/barbers') ? path : `/barbers${path}`)
@@ -261,7 +263,7 @@ async function bootstrap() {
   app.use(
     '/specialties',
     createProxyMiddleware({
-      target: 'http://barber-service:3007',
+      target: 'http://barber-service:3003',
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => (path.startsWith('/specialties') ? path : `/specialties${path}`)
@@ -270,7 +272,7 @@ async function bootstrap() {
   app.use(
     '/services',
     createProxyMiddleware({
-      target: 'http://barber-service:3007',
+      target: 'http://barber-service:3003',
       changeOrigin: true,
       ws: true,
       pathRewrite: (path) => (path.startsWith('/services') ? path : `/services${path}`)

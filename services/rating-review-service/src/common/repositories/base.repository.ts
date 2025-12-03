@@ -47,7 +47,8 @@ export abstract class BaseRepository<T extends BaseEntity> extends Repository<T>
       updatedBy: userId,
     } as any);
     
-    return this.save(entity);
+    const saved = await this.save(entity);
+    return Array.isArray(saved) ? saved[0] : saved;
   }
 
   async updateEntity(id: string, entityData: DeepPartial<T>, userId?: string): Promise<T> {

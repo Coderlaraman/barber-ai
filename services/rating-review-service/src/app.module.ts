@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { SchedulerModule } from './scheduler.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { HealthModule } from './health/health.module'
-import { BarberAvailability } from './availability/entities/barber-availability.entity'
-import { Service } from './services/entities/service.entity'
-import { TimeSlot } from './time-slots/entities/time-slot.entity'
+import { RatingsModule } from './modules/ratings/ratings.module'
+import { Rating } from './modules/ratings/entities/rating.entity'
 
 @Module({
   imports: [
@@ -15,12 +12,8 @@ import { TimeSlot } from './time-slots/entities/time-slot.entity'
         const url = process.env.DATABASE_URL
         const base: any = { 
           type: 'postgres', 
-          entities: [
-            BarberAvailability, 
-            Service, 
-            TimeSlot
-          ], 
-          synchronize: false 
+          entities: [Rating], 
+          synchronize: true 
         }
         if (url) return { ...base, url }
         return {
@@ -33,8 +26,9 @@ import { TimeSlot } from './time-slots/entities/time-slot.entity'
         }
       }
     }),
-    HealthModule,
-    SchedulerModule
-  ]
+    RatingsModule
+  ],
+  controllers: [],
+  providers: []
 })
 export class AppModule {}

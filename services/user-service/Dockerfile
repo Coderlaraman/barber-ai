@@ -15,7 +15,8 @@ COPY services/user-service ./
 RUN npm run build
 
 # Expose port
-EXPOSE 3003
+ENV PORT=3002
+EXPOSE 3002
 
 # Start the application
 CMD ["node", "dist/main"]

@@ -8,6 +8,6 @@ RUN npm install --no-audit --no-fund
 COPY services/scheduler-service/tsconfig.json ./
 COPY services/scheduler-service/src ./src
 RUN npm run build
-ENV PORT=3002
-EXPOSE 3002
+ENV PORT=3011
+EXPOSE 3011
 CMD ["node", "dist/main.js"]

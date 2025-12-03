@@ -8,6 +8,6 @@ RUN npm install --no-audit --no-fund
 COPY services/notifications-service/tsconfig.json ./
 COPY services/notifications-service/src ./src
 RUN npm run build
-ENV PORT=3003
-EXPOSE 3003
+ENV PORT=3009
+EXPOSE 3009
 CMD ["node", "dist/main.js"]

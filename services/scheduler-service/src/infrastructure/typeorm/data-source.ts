@@ -1,7 +1,6 @@
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import { Block } from '../../domain/entities/block.entity'
-import { Appointment } from '../../domain/entities/appointment.entity'
 
 const url = process.env.DATABASE_URL
 
@@ -10,7 +9,7 @@ export const AppDataSource = new DataSource(
     ? {
         type: 'postgres',
         url,
-        entities: [Block, Appointment],
+        entities: [Block],
         migrations: ['dist/infrastructure/typeorm/migrations/*.js'],
         synchronize: false
       }
@@ -21,7 +20,7 @@ export const AppDataSource = new DataSource(
         username: process.env.DB_USER || 'barber',
         password: process.env.DB_PASSWORD || 'barber',
         database: process.env.DB_NAME || 'barber',
-        entities: [Block, Appointment],
+        entities: [Block],
         migrations: ['dist/infrastructure/typeorm/migrations/*.js'],
         synchronize: false
       }

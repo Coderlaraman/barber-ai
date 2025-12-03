@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { HttpModule } from '@nestjs/axios'
 import { BookingController } from './controllers/booking.controller'
 import { BookingService } from './services/booking.service'
 import { Booking } from './entities/booking.entity'
@@ -8,7 +9,10 @@ import { BookingReminderService } from './services/booking-reminder.service'
 import { EventBusService } from '@barber_ai/contracts'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking])],
+  imports: [
+    TypeOrmModule.forFeature([Booking]),
+    HttpModule
+  ],
   controllers: [BookingController],
   providers: [BookingService, BookingEventProcessor, BookingReminderService],
   exports: [BookingService, BookingEventProcessor, BookingReminderService]

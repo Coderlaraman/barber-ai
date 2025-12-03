@@ -1,47 +1,30 @@
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './modules/app.module';
+import { NestFactory } from '@nestjs/core'
+import { AppModule } from './app.module'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const configService = app.get(ConfigService);
+  const app = await NestFactory.create(AppModule)
   
-  // Configuración global
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.enableCors()
+  
+  const config = new DocumentBuilder()
+    .setTitle('Rating & Review Service')
+    .setDescription('API for managing ratings and reviews')
+    .setVersion('1.0')
+    .build()
+    
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('ratings/docs', app, document)
 
-  // Habilitar CORS
-  app.enableCors({
-    origin: configService.get('CORS_ORIGIN', '*'),
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+  app.getHttpAdapter().get('/ratings/health', (req, res) => {
+    res.json({ status: 'ok', service: 'rating-review' })
+  })
 
-  // Configuración de Swagger
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('BarberIA Rating & Reviews Service API')
-    .setDescription('Endpoints de gestión de calificaciones y reseñas')
-    .setVersion('0.1.0')
-    .addBearerAuth()
-    .build();
-  
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document);
-  
-  // Endpoint para API Gateway
-  app.getHttpAdapter().getInstance().get('/docs-json', (req: any, res: any) => {
-    res.json(document);
-  });
+  app.getHttpAdapter().get('/docs-json', (req, res) => {
+    res.json(document)
+  })
 
-  const port = configService.get('PORT', 3008);
-  await app.listen(port);
-  
-  console.log(`Rating & Reviews Service is running on: http://localhost:${port}`);
+  await app.listen(process.env.PORT ? Number(process.env.PORT) : 3008)
+  console.log(`Rating service running on port ${process.env.PORT || 3008}`)
 }
-
-bootstrap();
+bootstrap()

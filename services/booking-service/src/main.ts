@@ -21,8 +21,8 @@ async function bootstrap() {
     res.json(document)
   })
   
-  await app.listen(process.env.PORT ? Number(process.env.PORT) : 3005)
-  console.log(`Booking service running on port ${process.env.PORT || 3005}`)
+  await app.listen(process.env.PORT ? Number(process.env.PORT) : 3007)
+  console.log(`Booking service running on port ${process.env.PORT || 3007}`)
 }
 
 bootstrap()
