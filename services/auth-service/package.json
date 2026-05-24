@@ -16,7 +16,7 @@
     "@nestjs/platform-express": "^10.4.10",
     "@nestjs/config": "^3.2.2",
     "@nestjs/jwt": "^10.2.0",
-    "@nestjs/typeorm": "^10.0.2",
+    "@nestjs/typeorm": "^11.0.1",
     "@nestjs/passport": "^10.0.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -24,7 +24,7 @@
     "class-validator": "^0.14.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20",
+    "typeorm": "^1.0.0",
     "pg": "^8.13.1",
     "bcryptjs": "^2.4.3"
   },
